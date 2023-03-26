@@ -1,7 +1,56 @@
+local function readScale(path)
+	local file = getModFileReader("MapSymbolSizeSlider", path, true)
+	local scanline = file:readLine()
+	local content = scanline and '' or 'return {}'
+
+	while scanline do
+		content = content .. scanline .. '\n'
+		scanline = file:readLine()
+	end
+
+	file:close()
+
+	local config = loadstring(content)()
+	print( ("MapSymbolSizeSlider Scale %s"):format(tostring(config.Scale)) )
+
+	return config
+end
+
+local table_to_string;
+table_to_string = function(tbl, indent)
+	indent = indent or ''
+	local str = ''
+
+	for k, v in pairs(tbl) do
+		str = str .. indent
+
+		if type(k) == 'string' then
+			str = str .. '["'.. escape_key(k) ..'"] = '
+		else
+			str = str .. '['.. tostring(k) ..'] = '
+		end
+
+		if type(v) == 'table' then
+			str = str .. '{\n' .. table_to_string(v, indent .. '\t') .. indent .. '}' 
+		else
+			if type(v) == 'string' then
+				str = str .. '"' .. escape_key(v) .. '"'
+			else
+				str = str .. tostring(v)
+			end
+		end
+
+		str = str .. ',\n'
+	end
+
+	return str
+end
+
 local MapSymbolSizeSlider = {
 	params = {
-		defaultScale = ISMap.SCALE,
-		currentScale = ISMap.SCALE -- should be moved to ISWorldMapSymbols class
+		config = readScale("config.lua"),
+		defaultScale = readScale("config.lua").Scale,
+		currentScale = readScale("config.lua").Scale -- should be moved to ISWorldMapSymbols class
 	},
 	consts = {
 		scaleMin = 0.066,
@@ -56,6 +105,11 @@ end
 function MapSymbolSizeSlider.onSliderChange(target, _newvalue)
 	MapSymbolSizeSlider.params.currentScale = SCALE_MIN + SCALE_STEP * _newvalue
 	ISWorldMapSymbols:ChangeGlobalScale(MapSymbolSizeSlider.params.currentScale)
+	MapSymbolSizeSlider.params.config["Scale"] = MapSymbolSizeSlider.params.currentScale
+
+	local file = getModFileWriter("MapSymbolSizeSlider", "config.lua", true, false) -- TODO: refactor writing
+	file:write('return {\n' .. table_to_string(MapSymbolSizeSlider.params.config, '\t') .. '}')
+	file:close()
 end
 
 
