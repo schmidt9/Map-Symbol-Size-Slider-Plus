@@ -1,5 +1,18 @@
-local function readScale(path)
-	local file = getModFileReader("MapSymbolSizeSlider", path, true)
+MapSymbolSizeSlider = {}
+MapSymbolSizeSlider.MOD_ID = "MapSymbolSizeSlider"
+MapSymbolSizeSlider.CONFIG_FILE_NAME = "config.lua"
+MapSymbolSizeSlider.defaultConfig = {
+	["scale"] = 0.666,
+}
+
+local function readConfig(path)
+	local file = getModFileReader(MapSymbolSizeSlider.MOD_ID, path, false)
+
+	if file == nil then
+		print("MapSymbolSizeSlider - No config at path ", path)
+		return nil
+	end
+
 	local scanline = file:readLine()
 	local content = scanline and '' or 'return {}'
 
@@ -10,14 +23,10 @@ local function readScale(path)
 
 	file:close()
 
-	local config = loadstring(content)()
-	print( ("MapSymbolSizeSlider Scale %s"):format(tostring(config.Scale)) )
-
-	return config
+	return loadstring(content)()
 end
 
-local table_to_string;
-table_to_string = function(tbl, indent)
+local function table_to_string(tbl, indent)
 	indent = indent or ''
 	local str = ''
 
@@ -46,37 +55,34 @@ table_to_string = function(tbl, indent)
 	return str
 end
 
-local MapSymbolSizeSlider = {
-	params = {
-		config = readScale("config.lua"),
-		defaultScale = readScale("config.lua").Scale,
-		currentScale = readScale("config.lua").Scale -- should be moved to ISWorldMapSymbols class
-	},
-	consts = {
-		scaleMin = 0.066,
-		scaleMax = 2.266,
-		scaleStep = 0.1,
+MapSymbolSizeSlider.config = readConfig(MapSymbolSizeSlider.CONFIG_FILE_NAME) or MapSymbolSizeSlider.defaultConfig
+MapSymbolSizeSlider.params = {
+	defaultScale = MapSymbolSizeSlider.defaultConfig.scale,
+	currentScale = MapSymbolSizeSlider.config.scale
+}
+MapSymbolSizeSlider.consts = {
+	scaleMin = 0.066,
+	scaleMax = 2.266,
+	scaleStep = 0.1,
 		
-		-- Do not change. Used to determine scale from texture
-		defaultSymbolHeight = 20, -- 20 px
-		defaultTextHeight = getTextManager():getFontHeight(UIFont.Handwritten) -- 36 px
+	-- Do not change. Used to determine scale from texture
+	defaultSymbolHeight = 20, -- 20 px
+	defaultTextHeight = getTextManager():getFontHeight(UIFont.Handwritten) -- 36 px
+}
+MapSymbolSizeSlider.originalPZFuncs = {
+	ISWorldMapSymbols = {
+		prerender = ISWorldMapSymbols.prerender,
+		createChildren = ISWorldMapSymbols.createChildren,
+		new = ISWorldMapSymbols.new
 	},
-	-- original functions that are being intercepted
-	originalPZFuncs = {
-		ISWorldMapSymbols = {
-			prerender = ISWorldMapSymbols.prerender,
-			createChildren = ISWorldMapSymbols.createChildren,
-			new = ISWorldMapSymbols.new
-		},
-		ISWorldMapSymbolTool_EditNote = {
-			onMouseDown = ISWorldMapSymbolTool_EditNote.onMouseDown,
-			onEditNote = ISWorldMapSymbolTool_EditNote.onEditNote
-		}
-	},
-	compatability = {
-		ExtraMapSymbolsUI_installed = false,
-		ExtraMapSymbols_installed = false
-	},
+	ISWorldMapSymbolTool_EditNote = {
+		onMouseDown = ISWorldMapSymbolTool_EditNote.onMouseDown,
+		onEditNote = ISWorldMapSymbolTool_EditNote.onEditNote
+	}
+}
+MapSymbolSizeSlider.compatability = {
+	ExtraMapSymbolsUI_installed = false,
+	ExtraMapSymbols_installed = false
 }
 
 require "RadioCom/ISUIRadio/ISSliderPanel"
@@ -105,11 +111,12 @@ end
 function MapSymbolSizeSlider.onSliderChange(target, _newvalue)
 	MapSymbolSizeSlider.params.currentScale = SCALE_MIN + SCALE_STEP * _newvalue
 	ISWorldMapSymbols:ChangeGlobalScale(MapSymbolSizeSlider.params.currentScale)
-	MapSymbolSizeSlider.params.config["Scale"] = MapSymbolSizeSlider.params.currentScale
+	MapSymbolSizeSlider.config.scale = MapSymbolSizeSlider.params.currentScale
+	print("MapSymbolSizeSlider New scale ", MapSymbolSizeSlider.config.scale)
 
-	local file = getModFileWriter("MapSymbolSizeSlider", "config.lua", true, false) -- TODO: refactor writing
-	file:write('return {\n' .. table_to_string(MapSymbolSizeSlider.params.config, '\t') .. '}')
-	file:close()
+	-- local file = getModFileWriter("MapSymbolSizeSlider", "config.lua", true, false) -- TODO: refactor writing
+	-- file:write('return {\n' .. table_to_string(MapSymbolSizeSlider.params.config, '\t') .. '}')
+	-- file:close()
 end
 
 
