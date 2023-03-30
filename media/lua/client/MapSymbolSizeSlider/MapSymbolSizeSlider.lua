@@ -2,14 +2,46 @@ MapSymbolSizeSlider = {}
 MapSymbolSizeSlider.MOD_ID = "MapSymbolSizeSlider"
 MapSymbolSizeSlider.CONFIG_FILE_NAME = "config.lua"
 MapSymbolSizeSlider.defaultConfig = {
-	["scale"] = 0.666,
+	["scale"] = ISMap.SCALE,
 }
+
+local function escapeKey(str)
+	return str:gsub('"', '\\"')
+end
+
+local function tableToString(tbl, indent)
+	indent = indent or ''
+	local str = ''
+
+	for k, v in pairs(tbl) do
+		str = str .. indent
+
+		if type(k) == 'string' then
+			str = str .. '["'.. escapeKey(k) ..'"] = '
+		else
+			str = str .. '['.. tostring(k) ..'] = '
+		end
+
+		if type(v) == 'table' then
+			str = str .. '{\n' .. tableToString(v, indent .. '\t') .. indent .. '}' 
+		else
+			if type(v) == 'string' then
+				str = str .. '"' .. escapeKey(v) .. '"'
+			else
+				str = str .. tostring(v)
+			end
+		end
+
+		str = str .. ',\n'
+	end
+
+	return str
+end
 
 local function readConfig(path)
 	local file = getModFileReader(MapSymbolSizeSlider.MOD_ID, path, false)
 
 	if file == nil then
-		print("MapSymbolSizeSlider - No config at path ", path)
 		return nil
 	end
 
@@ -26,33 +58,10 @@ local function readConfig(path)
 	return loadstring(content)()
 end
 
-local function table_to_string(tbl, indent)
-	indent = indent or ''
-	local str = ''
-
-	for k, v in pairs(tbl) do
-		str = str .. indent
-
-		if type(k) == 'string' then
-			str = str .. '["'.. escape_key(k) ..'"] = '
-		else
-			str = str .. '['.. tostring(k) ..'] = '
-		end
-
-		if type(v) == 'table' then
-			str = str .. '{\n' .. table_to_string(v, indent .. '\t') .. indent .. '}' 
-		else
-			if type(v) == 'string' then
-				str = str .. '"' .. escape_key(v) .. '"'
-			else
-				str = str .. tostring(v)
-			end
-		end
-
-		str = str .. ',\n'
-	end
-
-	return str
+local function writeConfig(path, config)
+	local file = getModFileWriter(MapSymbolSizeSlider.MOD_ID, path, true, false)
+	file:write('return {\n' .. tableToString(config, '\t') .. '}')
+	file:close()
 end
 
 MapSymbolSizeSlider.config = readConfig(MapSymbolSizeSlider.CONFIG_FILE_NAME) or MapSymbolSizeSlider.defaultConfig
@@ -112,11 +121,8 @@ function MapSymbolSizeSlider.onSliderChange(target, _newvalue)
 	MapSymbolSizeSlider.params.currentScale = SCALE_MIN + SCALE_STEP * _newvalue
 	ISWorldMapSymbols:ChangeGlobalScale(MapSymbolSizeSlider.params.currentScale)
 	MapSymbolSizeSlider.config.scale = MapSymbolSizeSlider.params.currentScale
-	print("MapSymbolSizeSlider New scale ", MapSymbolSizeSlider.config.scale)
 
-	-- local file = getModFileWriter("MapSymbolSizeSlider", "config.lua", true, false) -- TODO: refactor writing
-	-- file:write('return {\n' .. table_to_string(MapSymbolSizeSlider.params.config, '\t') .. '}')
-	-- file:close()
+	writeConfig(MapSymbolSizeSlider.CONFIG_FILE_NAME, MapSymbolSizeSlider.config)
 end
 
 
