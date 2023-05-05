@@ -1,7 +1,7 @@
-MapSymbolSizeSlider = {}
-MapSymbolSizeSlider.MOD_ID = "MapSymbolSizeSlider"
-MapSymbolSizeSlider.CONFIG_FILE_NAME = "config.lua"
-MapSymbolSizeSlider.defaultConfig = {
+MapSymbolSizeSliderPlus = {}
+MapSymbolSizeSliderPlus.MOD_ID = "MapSymbolSizeSliderPlus"
+MapSymbolSizeSliderPlus.CONFIG_FILE_NAME = "config.lua"
+MapSymbolSizeSliderPlus.defaultConfig = {
 	["scale"] = ISMap.SCALE,
 }
 
@@ -39,7 +39,7 @@ local function tableToString(tbl, indent)
 end
 
 local function readConfig(path)
-	local file = getModFileReader(MapSymbolSizeSlider.MOD_ID, path, false)
+	local file = getModFileReader(MapSymbolSizeSliderPlus.MOD_ID, path, false)
 
 	if file == nil then
 		return nil
@@ -59,17 +59,17 @@ local function readConfig(path)
 end
 
 local function writeConfig(path, config)
-	local file = getModFileWriter(MapSymbolSizeSlider.MOD_ID, path, true, false)
+	local file = getModFileWriter(MapSymbolSizeSliderPlus.MOD_ID, path, true, false)
 	file:write('return {\n' .. tableToString(config, '\t') .. '}')
 	file:close()
 end
 
-MapSymbolSizeSlider.config = readConfig(MapSymbolSizeSlider.CONFIG_FILE_NAME) or MapSymbolSizeSlider.defaultConfig
-MapSymbolSizeSlider.params = {
-	defaultScale = MapSymbolSizeSlider.defaultConfig.scale,
-	currentScale = MapSymbolSizeSlider.config.scale
+MapSymbolSizeSliderPlus.config = readConfig(MapSymbolSizeSliderPlus.CONFIG_FILE_NAME) or MapSymbolSizeSliderPlus.defaultConfig
+MapSymbolSizeSliderPlus.params = {
+	defaultScale = MapSymbolSizeSliderPlus.defaultConfig.scale,
+	currentScale = MapSymbolSizeSliderPlus.config.scale
 }
-MapSymbolSizeSlider.consts = {
+MapSymbolSizeSliderPlus.consts = {
 	scaleMin = 0.066,
 	scaleMax = 2.266,
 	scaleStep = 0.1,
@@ -78,7 +78,7 @@ MapSymbolSizeSlider.consts = {
 	defaultSymbolHeight = 20, -- 20 px
 	defaultTextHeight = getTextManager():getFontHeight(UIFont.Handwritten) -- 36 px
 }
-MapSymbolSizeSlider.originalPZFuncs = {
+MapSymbolSizeSliderPlus.originalPZFuncs = {
 	ISWorldMapSymbols = {
 		prerender = ISWorldMapSymbols.prerender,
 		createChildren = ISWorldMapSymbols.createChildren,
@@ -89,7 +89,7 @@ MapSymbolSizeSlider.originalPZFuncs = {
 		onEditNote = ISWorldMapSymbolTool_EditNote.onEditNote
 	}
 }
-MapSymbolSizeSlider.compatability = {
+MapSymbolSizeSliderPlus.compatability = {
 	ExtraMapSymbolsUI_installed = false,
 	ExtraMapSymbols_installed = false
 }
@@ -99,36 +99,36 @@ require "RadioCom/ISUIRadio/ISSliderPanel"
 
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 
-local SCALE_MIN = MapSymbolSizeSlider.consts.scaleMin
-local SCALE_MAX = MapSymbolSizeSlider.consts.scaleMax
-local SCALE_STEP = MapSymbolSizeSlider.consts.scaleStep
+local SCALE_MIN = MapSymbolSizeSliderPlus.consts.scaleMin
+local SCALE_MAX = MapSymbolSizeSliderPlus.consts.scaleMax
+local SCALE_STEP = MapSymbolSizeSliderPlus.consts.scaleStep
 
 
-MapSymbolSizeSlider.ISScaleSliderPanel = ISSliderPanel:derive("ISScaleSliderPanel");
+MapSymbolSizeSliderPlus.ISScaleSliderPanel = ISSliderPanel:derive("ISScaleSliderPanel");
 
-function MapSymbolSizeSlider.ISScaleSliderPanel:render()
+function MapSymbolSizeSliderPlus.ISScaleSliderPanel:render()
 	ISSliderPanel.render(self)
 
 	-- Draw helper hatch on default value
-	local relativePos = (MapSymbolSizeSlider.params.defaultScale - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)
+	local relativePos = (MapSymbolSizeSliderPlus.params.defaultScale - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)
 	local hatchX = self.sliderBarDim.x + self.sliderBarDim.w * relativePos
 	local hatchY = self.sliderBarDim.y + self.sliderDim.h / 2 + 2 
 	self:drawRect(hatchX, hatchY, 1, 3, self.sliderBarBorderColor.a, self.sliderBarBorderColor.r, self.sliderBarBorderColor.g, self.sliderBarBorderColor.b)
 end
 
 
-function MapSymbolSizeSlider.onSliderChange(target, _newvalue)
-	MapSymbolSizeSlider.params.currentScale = SCALE_MIN + SCALE_STEP * _newvalue
-	ISWorldMapSymbols:ChangeGlobalScale(MapSymbolSizeSlider.params.currentScale)
-	MapSymbolSizeSlider.config.scale = MapSymbolSizeSlider.params.currentScale
+function MapSymbolSizeSliderPlus.onSliderChange(target, _newvalue)
+	MapSymbolSizeSliderPlus.params.currentScale = SCALE_MIN + SCALE_STEP * _newvalue
+	ISWorldMapSymbols:ChangeGlobalScale(MapSymbolSizeSliderPlus.params.currentScale)
+	MapSymbolSizeSliderPlus.config.scale = MapSymbolSizeSliderPlus.params.currentScale
 
-	writeConfig(MapSymbolSizeSlider.CONFIG_FILE_NAME, MapSymbolSizeSlider.config)
+	writeConfig(MapSymbolSizeSliderPlus.CONFIG_FILE_NAME, MapSymbolSizeSliderPlus.config)
 end
 
 
-function MapSymbolSizeSlider.createSlider(target, x, y, w, h, func)
-	local slider = MapSymbolSizeSlider.ISScaleSliderPanel:new(x, y, w, h, target, func)
-	slider.currentValue = (MapSymbolSizeSlider.params.currentScale - SCALE_MIN) / SCALE_STEP
+function MapSymbolSizeSliderPlus.createSlider(target, x, y, w, h, func)
+	local slider = MapSymbolSizeSliderPlus.ISScaleSliderPanel:new(x, y, w, h, target, func)
+	slider.currentValue = (MapSymbolSizeSliderPlus.params.currentScale - SCALE_MIN) / SCALE_STEP
 	slider:setValues(0, (SCALE_MAX - SCALE_MIN) / SCALE_STEP, 1, 0)
 	slider:initialise()
 	slider:instantiate()
@@ -142,7 +142,7 @@ function ISWorldMapSymbols:ChangeGlobalScale(newValue)
 	ISMap.SCALE = newValue
 
 	-- ExtraMapSymbolsUI mod compatability
-	if MapSymbolSizeSlider.compatability.ExtraMapSymbolsUI_installed then
+	if MapSymbolSizeSliderPlus.compatability.ExtraMapSymbolsUI_installed then
 		ExtraMapSymbolsUI.ScalingSymbol = newValue
 		ExtraMapSymbolsUI.ScalingText = newValue
 	end
@@ -150,10 +150,10 @@ end
 
 
 function ISWorldMapSymbols:prerender()
-	MapSymbolSizeSlider.originalPZFuncs.ISWorldMapSymbols.prerender(self)
+	MapSymbolSizeSliderPlus.originalPZFuncs.ISWorldMapSymbols.prerender(self)
 
 	-- [ExtraMapSymbols mod compatability] runs once
-	MapSymbolSizeSlider.compatability.getBackThePrerender(self)
+	MapSymbolSizeSliderPlus.compatability.getBackThePrerender(self)
 	-- END [ExtraMapSymbols mod compatability]
 
 	if self.MSSS_anchorElement == nil then return end
@@ -165,7 +165,7 @@ end
 
 
 function ISWorldMapSymbols:createChildren()
-	MapSymbolSizeSlider.originalPZFuncs.ISWorldMapSymbols.createChildren(self)
+	MapSymbolSizeSliderPlus.originalPZFuncs.ISWorldMapSymbols.createChildren(self)
 	
 	if self.MSSS_anchorElement == nil then
 		self.MSSS_anchorElement = self.children[ISUIElement.IDMax - 1]
@@ -175,7 +175,7 @@ function ISWorldMapSymbols:createChildren()
 	local sldrHgt = FONT_HGT_SMALL + 2 * 2
 	local y = self.MSSS_anchorElement:getBottom() + sldrHgt + 20
 
-	self.scaleSlider = MapSymbolSizeSlider.createSlider(self, 20, y, sldrWid, sldrHgt, MapSymbolSizeSlider.onSliderChange)
+	self.scaleSlider = MapSymbolSizeSliderPlus.createSlider(self, 20, y, sldrWid, sldrHgt, MapSymbolSizeSliderPlus.onSliderChange)
 	self:addChild(self.scaleSlider)
 
 	self:setHeight(self.scaleSlider:getBottom() + 20)
@@ -188,18 +188,18 @@ function ISWorldMapSymbolTool_EditNote:onMouseDown(...)
 	
 	-- if note is being edited, update scale for correct size render
 	local symbol = self.symbolsAPI:getSymbolByIndex(self.symbolsUI.mouseOverNote)
-	local newScale = symbol:getDisplayHeight() / (self.mapAPI:getWorldScale() * MapSymbolSizeSlider.consts.defaultTextHeight)
+	local newScale = symbol:getDisplayHeight() / (self.mapAPI:getWorldScale() * MapSymbolSizeSliderPlus.consts.defaultTextHeight)
 	ISWorldMapSymbols:ChangeGlobalScale(newScale)
 	
-	return MapSymbolSizeSlider.originalPZFuncs.ISWorldMapSymbolTool_EditNote.onMouseDown(self, ...)
+	return MapSymbolSizeSliderPlus.originalPZFuncs.ISWorldMapSymbolTool_EditNote.onMouseDown(self, ...)
 end
 
 
 function ISWorldMapSymbolTool_EditNote:onEditNote(...)
-	MapSymbolSizeSlider.originalPZFuncs.ISWorldMapSymbolTool_EditNote.onEditNote(self, ...)
+	MapSymbolSizeSliderPlus.originalPZFuncs.ISWorldMapSymbolTool_EditNote.onEditNote(self, ...)
 
 	-- return scale back to currentScale after note has been saved
-	ISWorldMapSymbols:ChangeGlobalScale(MapSymbolSizeSlider.params.currentScale)
+	ISWorldMapSymbols:ChangeGlobalScale(MapSymbolSizeSliderPlus.params.currentScale)
 end
 
 
@@ -207,28 +207,28 @@ end
 
 local ISWorldMapSymbols_extraUI_Refresh = nil
 
-local MapSymbolSizeSlider_ISWorldMapSymbols_prerender = ISWorldMapSymbols.prerender
+local MapSymbolSizeSliderPlus_ISWorldMapSymbols_prerender = ISWorldMapSymbols.prerender
 
 
-function MapSymbolSizeSlider.compatability.getBackThePrerender(target)
+function MapSymbolSizeSliderPlus.compatability.getBackThePrerender(target)
 	-- If you are seeing this, I'm sorry 
 	-- Had to do this, due to other mod changing the logic of build-in prerender and using it as an init function:
 	-- "ExtraMapSymbols\media\lua\client\ExtraMapSymbols.lua" end of the file (prerender manipulation)
 	-- ^^^ this blocks the possibility of interception of `prerender` for every other mod below it.
 
-	if not MapSymbolSizeSlider_ISWorldMapSymbols_prerender then return end
+	if not MapSymbolSizeSliderPlus_ISWorldMapSymbols_prerender then return end
 
-	MapSymbolSizeSlider.compatability.ExtraMapSymbols_installed = target:isExtraMapSymbolsInstalled()
+	MapSymbolSizeSliderPlus.compatability.ExtraMapSymbols_installed = target:isExtraMapSymbolsInstalled()
 
-	if MapSymbolSizeSlider.compatability.ExtraMapSymbols_installed then 
-		MapSymbolSizeSlider.originalPZFuncs.ISWorldMapSymbols.prerender = ISWorldMapSymbols.prerender
-		ISWorldMapSymbols.prerender = MapSymbolSizeSlider_ISWorldMapSymbols_prerender
+	if MapSymbolSizeSliderPlus.compatability.ExtraMapSymbols_installed then 
+		MapSymbolSizeSliderPlus.originalPZFuncs.ISWorldMapSymbols.prerender = ISWorldMapSymbols.prerender
+		ISWorldMapSymbols.prerender = MapSymbolSizeSliderPlus_ISWorldMapSymbols_prerender
 	end
 
-	MapSymbolSizeSlider_ISWorldMapSymbols_prerender = nil  -- set it to nil so this crap never runs again
+	MapSymbolSizeSliderPlus_ISWorldMapSymbols_prerender = nil  -- set it to nil so this crap never runs again
 end
 
-function MapSymbolSizeSlider:extraUI_Refresh(...)
+function MapSymbolSizeSliderPlus:extraUI_Refresh(...)
 	ISWorldMapSymbols_extraUI_Refresh(self, ...)
 	
 	local sldrHgt = FONT_HGT_SMALL + 2 * 2
@@ -246,13 +246,13 @@ function MapSymbolSizeSlider:extraUI_Refresh(...)
 end
 
 
-function MapSymbolSizeSlider.getScalingSymbolHandler(ISWorldMapSymbols_object)
+function MapSymbolSizeSliderPlus.getScalingSymbolHandler(ISWorldMapSymbols_object)
 	-- used this approach since I have no time to figure out a better solution
 	function scalingSymbolHandler(oldValue, newValue)
-		MapSymbolSizeSlider.params.currentScale = newValue
-		ISMap.SCALE = MapSymbolSizeSlider.params.currentScale
+		MapSymbolSizeSliderPlus.params.currentScale = newValue
+		ISMap.SCALE = MapSymbolSizeSliderPlus.params.currentScale
 
-		ISWorldMapSymbols_object.scaleSlider:setCurrentValue((MapSymbolSizeSlider.params.currentScale - SCALE_MIN) / SCALE_STEP, true)
+		ISWorldMapSymbols_object.scaleSlider:setCurrentValue((MapSymbolSizeSliderPlus.params.currentScale - SCALE_MIN) / SCALE_STEP, true)
 	end
 	
 	return scalingSymbolHandler
@@ -269,18 +269,18 @@ function ISWorldMapSymbols:isExtraMapSymbolsInstalled()
 end
 
 function ISWorldMapSymbols:new(...)
-	local ISWorldMapSymbols_object = MapSymbolSizeSlider.originalPZFuncs.ISWorldMapSymbols.new(self, ...)
+	local ISWorldMapSymbols_object = MapSymbolSizeSliderPlus.originalPZFuncs.ISWorldMapSymbols.new(self, ...)
 
 	if ExtraMapSymbolsUI ~= nil then
-		MapSymbolSizeSlider.compatability.ExtraMapSymbolsUI_installed = true
+		MapSymbolSizeSliderPlus.compatability.ExtraMapSymbolsUI_installed = true
 	end
 
 	-- if ExtraMapSymbolsUI mod is installed and decorator is not applied, apply my decorator
-	if MapSymbolSizeSlider.compatability.ExtraMapSymbolsUI_installed and ISWorldMapSymbols_extraUI_Refresh == nil then
+	if MapSymbolSizeSliderPlus.compatability.ExtraMapSymbolsUI_installed and ISWorldMapSymbols_extraUI_Refresh == nil then
 		ISWorldMapSymbols_extraUI_Refresh = self.extraUI_Refresh
-		self.extraUI_Refresh = MapSymbolSizeSlider.extraUI_Refresh
+		self.extraUI_Refresh = MapSymbolSizeSliderPlus.extraUI_Refresh
 
-		ExtraMapSymbolsUI:OnEvent("ScalingSymbol", MapSymbolSizeSlider.getScalingSymbolHandler(ISWorldMapSymbols_object))
+		ExtraMapSymbolsUI:OnEvent("ScalingSymbol", MapSymbolSizeSliderPlus.getScalingSymbolHandler(ISWorldMapSymbols_object))
 	end
 
 	return ISWorldMapSymbols_object
