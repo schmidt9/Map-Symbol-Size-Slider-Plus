@@ -1,5 +1,6 @@
 version=1
 title=Map Symbol Size Slider Plus
 description=Adds Symbol Size slider to map symbols menu and preserves selected size
-description=This mod is a modification of the original Map Symbol Size Slider (https://steamcommunity.com/sharedfiles/filedetails/?id=2734705913), which preserves selected symbol size between game launches.
+description=This mod is a modification of the original Map Symbol Size Slider (https://steamcommunity.com/sharedfiles/filedetails/?id=2734705913), which adds ability to preserve selected symbol size between game launches.
+description=GitHub repo: https://github.com/schmidt9/Map-Symbol-Size-Slider-Plus
 visibility=public
