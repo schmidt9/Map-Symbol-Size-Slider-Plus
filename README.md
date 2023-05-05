@@ -5,3 +5,7 @@ This mod is a modification of the original Map Symbol Size Slider (https://steam
 # Note
 
 Russian localization file `IG_UI_RU.txt` has `Windows 1251` encoding to view properly in PZ, `UTF-8` not working
+
+# Steam Mod Upload manual
+
+https://steamcommunity.com/sharedfiles/filedetails/?id=534034411
