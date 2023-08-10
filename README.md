@@ -9,3 +9,7 @@ Russian localization file `IG_UI_RU.txt` has `Windows 1251` encoding to view pro
 # Steam Mod Upload manual
 
 https://steamcommunity.com/sharedfiles/filedetails/?id=534034411
+
+# Modding Manual 
+
+https://theindiestone.com/forums/index.php?/topic/61-robomats-modding-tutorials-updated-12112013/
